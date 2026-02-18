@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFG Converter (STIRAP Edition)</title>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 30px;
+    }
+
+    /* --- Mode Switcher Buttons --- */
+    .mode-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 10px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Active Button Styles matching the beam colors */
+    .mode-btn.active[data-target="sfg"] {
+      background: rgba(74, 222, 128, 0.2);
+      border-color: #4ade80;
+      color: #4ade80;
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+    }
+    .mode-btn.active[data-target="p1"] {
+      background: rgba(251, 146, 60, 0.2);
+      border-color: #fb923c;
+      color: #fb923c;
+      box-shadow: 0 0 15px rgba(251, 146, 60, 0.3);
+    }
+    .mode-btn.active[data-target="p2"] {
+      background: rgba(248, 113, 113, 0.2);
+      border-color: #f87171;
+      color: #f87171;
+      box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
+    }
+
+    /* --- Cards Layout --- */
+    .cards-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* --- Specific Beam Colors (Left Edge) --- */
+    /* Pump 1: Orange */
+    #card_p1 { border-left: 6px solid #fb923c; }
+    
+    /* Pump 2: Red */
+    #card_p2 { border-left: 6px solid #f87171; }
+    
+    /* SFG: Light Green */
+    #card_sfg { border-left: 6px solid #4ade80; }
+
+    /* --- Result State (Calculated) --- */
+    .card.is-result {
+      background: rgba(255, 255, 255, 0.03); /* Slightly lighter background */
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      transform: scale(1.02);
+      z-index: 10;
+    }
+
+    /* Add "(CALCULATED)" text styling */
+    .card.is-result h2::after {
+      content: " (CALCULATED)";
+      font-size: 0.6em;
+      vertical-align: middle;
+      margin-left: 10px;
+      letter-spacing: 1px;
+      opacity: 0.8;
+    }
+
+    /* Dynamic text color for "Calculated" label */
+    #card_p1.is-result h2::after { color: #fb923c; }
+    #card_p2.is-result h2::after { color: #f87171; }
+    #card_sfg.is-result h2::after { color: #4ade80; }
+
+    /* Read-only inputs */
+    .card.is-result input {
+      background: rgba(0,0,0,0.3);
+      cursor: not-allowed;
+      border-color: transparent;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* --- Input Styling --- */
+    .input-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    label {
+      width: 60px;
+      text-align: right;
+      margin-right: 10px;
+      color: #94a3b8;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: 140px;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    input:focus {
+      outline: none;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Focus colors matching beams */
+    #card_p1 input:focus { border-color: #fb923c; }
+    #card_p2 input:focus { border-color: #f87171; }
+    #card_sfg input:focus { border-color: #4ade80; }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      color: #e2e8f0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .status-msg {
+        height: 20px;
+        color: #f87171;
+        font-size: 0.9em;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>🔷 SFG Converter</h1>
+  <p>STIRAP Configuration (830nm + 1717nm)</p>
+
+  <div class="mode-container">
+    <button class="mode-btn active" data-target="sfg" id="btn_sfg" onclick="setMode('sfg', this)">Calc SFG Output</button>
+    <button class="mode-btn" data-target="p1" id="btn_p1" onclick="setMode('p1', this)">Calc Pump 1</button>
+    <button class="mode-btn" data-target="p2" id="btn_p2" onclick="setMode('p2', this)">Calc Pump 2</button>
+  </div>
+
+  <div class="cards-wrapper">
+
+    <div class="card" id="card_p1">
+      <h2>Pump 1 <span style="font-size:0.8em; opacity:0.7">(Upleg)</span></h2>
+      <div class="input-group"><label>nm</label><input type="number" id="nm_p1" oninput="handleInput('p1', 'nm')"></div>
+      <div class="input-group"><label>THz</label><input type="number" id="thz_p1" oninput="handleInput('p1', 'thz')"></div>
+      <div class="input-group"><label>cm⁻¹</label><input type="number" id="cm_p1" oninput="handleInput('p1', 'cm')"></div>
+    </div>
+
+    <div class="card" id="card_p2">
+      <h2>Pump 2 <span style="font-size:0.8em; opacity:0.7">(Preci)</span></h2>
+      <div class="input-group"><label>nm</label><input type="number" id="nm_p2" oninput="handleInput('p2', 'nm')"></div>
+      <div class="input-group"><label>THz</label><input type="number" id="thz_p2" oninput="handleInput('p2', 'thz')"></div>
+      <div class="input-group"><label>cm⁻¹</label><input type="number" id="cm_p2" oninput="handleInput('p2', 'cm')"></div>
+    </div>
+
+    <div class="card" id="card_sfg">
+      <h2>SFG Output <span style="font-size:0.8em; opacity:0.7">(Downleg)</span></h2>
+      <div class="input-group"><label>nm</label><input type="number" id="nm_sfg" oninput="handleInput('sfg', 'nm')"></div>
+      <div class="input-group"><label>THz</label><input type="number" id="thz_sfg" oninput="handleInput('sfg', 'thz')"></div>
+      <div class="input-group"><label>cm⁻¹</label><input type="number" id="cm_sfg" oninput="handleInput('sfg', 'cm')"></div>
+    </div>
+
+  </div>
+  
+  <div class="status-msg" id="status"></div>
+
+<script>
+  // --- Constants & Utilities ---
+  const c = 299792458; // m/s
+  let currentMode = 'sfg'; // 'sfg', 'p1', 'p2'
+
+  // Precision Settings
+  const PRECISION_THZ = 6;
+  const PRECISION_NM = 4;
+  const PRECISION_CM = 4;
+
+  // Basic Physics Conversions
+  function nm_to_thz(nm) { return (c / (nm * 1e-9)) / 1e12; }
+  function thz_to_nm(thz) { return (c / (thz * 1e12)) * 1e9; }
+  function nm_to_cm(nm)  { return 1e7 / nm; }
+  function cm_to_nm(cm)  { return 1e7 / cm; }
+  function cm_to_thz(cm) { return nm_to_thz(cm_to_nm(cm)); }
+  function thz_to_cm(thz){ return nm_to_cm(thz_to_nm(thz)); }
+
+  // --- Core Logic ---
+
+  function setMode(mode, btnElement) {
+    currentMode = mode;
+    
+    // Update buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    if(btnElement) btnElement.classList.add('active');
+
+    // Update Cards visual state (Read-only vs Editable)
+    updateCardState('p1', mode === 'p1');
+    updateCardState('p2', mode === 'p2');
+    updateCardState('sfg', mode === 'sfg');
+
+    // Trigger a recalculation
+    solve(); 
+  }
+
+  function updateCardState(idSuffix, isResult) {
+    const card = document.getElementById('card_' + idSuffix);
+    const inputs = card.querySelectorAll('input');
+    
+    if (isResult) {
+      card.classList.add('is-result');
+      inputs.forEach(i => i.readOnly = true);
+    } else {
+      card.classList.remove('is-result');
+      inputs.forEach(i => i.readOnly = false);
+    }
+  }
+
+  // --- Input Handling ---
+
+  function handleInput(section, unit) {
+    const inputVal = document.getElementById(`${unit}_${section}`).value;
+    const val = parseFloat(inputVal);
+    
+    if (!inputVal || isNaN(val)) return; 
+
+    // Update siblings in the same card immediately
+    if (unit === 'nm') {
+      document.getElementById(`thz_${section}`).value = nm_to_thz(val).toFixed(PRECISION_THZ);
+      document.getElementById(`cm_${section}`).value  = nm_to_cm(val).toFixed(PRECISION_CM);
+    } else if (unit === 'thz') {
+      document.getElementById(`nm_${section}`).value  = thz_to_nm(val).toFixed(PRECISION_NM);
+      document.getElementById(`cm_${section}`).value  = thz_to_cm(val).toFixed(PRECISION_CM);
+    } else if (unit === 'cm') {
+      document.getElementById(`nm_${section}`).value  = cm_to_nm(val).toFixed(PRECISION_NM);
+      document.getElementById(`thz_${section}`).value = cm_to_thz(val).toFixed(PRECISION_THZ);
+    }
+
+    // Solve for the calculated section
+    solve();
+  }
+
+  function solve() {
+    // 1. Get current values (raw values from inputs)
+    let f_p1 = parseFloat(document.getElementById('thz_p1').value);
+    let f_p2 = parseFloat(document.getElementById('thz_p2').value);
+    let f_sfg = parseFloat(document.getElementById('thz_sfg').value);
+    
+    let status = document.getElementById('status');
+    status.innerText = "";
+
+    // 2. Calculation Logic
+    if (currentMode === 'sfg') {
+      if (!f_p1 || !f_p2) return;
+      let res = f_p1 + f_p2;
+      updateSection('sfg', res);
+    } 
+    else if (currentMode === 'p1') {
+      if (!f_sfg || !f_p2) return;
+      let res = f_sfg - f_p2;
+      if (res <= 0) status.innerText = "Error: Negative Frequency Result";
+      else updateSection('p1', res);
+    } 
+    else if (currentMode === 'p2') {
+      if (!f_sfg || !f_p1) return;
+      let res = f_sfg - f_p1;
+      if (res <= 0) status.innerText = "Error: Negative Frequency Result";
+      else updateSection('p2', res);
+    }
+  }
+
+  function updateSection(section, thzVal) {
+    if (thzVal <= 0) return;
+
+    // Force strict formatting on the calculated result
+    document.getElementById(`thz_${section}`).value = thzVal.toFixed(PRECISION_THZ);
+    document.getElementById(`nm_${section}`).value  = thz_to_nm(thzVal).toFixed(PRECISION_NM);
+    document.getElementById(`cm_${section}`).value  = thz_to_cm(thzVal).toFixed(PRECISION_CM);
+  }
+
+  // --- Initialization ---
+  
+  // Set Defaults: Pump 1 = 830 nm
+  let start_nm_p1 = 830.0000;
+  document.getElementById('nm_p1').value = start_nm_p1;
+  // Manually populate siblings for P1
+  document.getElementById('thz_p1').value = nm_to_thz(start_nm_p1).toFixed(PRECISION_THZ);
+  document.getElementById('cm_p1').value = nm_to_cm(start_nm_p1).toFixed(PRECISION_CM);
+
+  // Set Defaults: Pump 2 = 1717.2293 nm
+  let start_nm_p2 = 1717.2293;
+  document.getElementById('nm_p2').value = start_nm_p2;
+  // Manually populate siblings for P2
+  document.getElementById('thz_p2').value = nm_to_thz(start_nm_p2).toFixed(PRECISION_THZ);
+  document.getElementById('cm_p2').value = nm_to_cm(start_nm_p2).toFixed(PRECISION_CM);
+
+  // Initialize Mode (default is calculate SFG from the above)
+  setMode('sfg', document.getElementById('btn_sfg'));
+  solve();
+
+</script>
+
+</body>
+</html>
