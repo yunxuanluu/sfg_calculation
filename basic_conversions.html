@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Basic Lab Conversions</title>
+<meta name="description" content="Basic browser-based laboratory unit conversions: dBm, power, voltage, frequency, wavelength, and temperature." />
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --blue: #2563eb;
+    --blue-soft: #eff6ff;
+    --green: #059669;
+    --red: #dc2626;
+    --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 30rem),
+      linear-gradient(135deg, #f8fbff 0%, var(--bg) 60%, #fff7ed 100%);
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 44px 24px 52px;
+  }
+
+  header {
+    margin-bottom: 28px;
+  }
+
+  .top-link {
+    display: inline-flex;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .top-link:hover {
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .intro {
+    margin: 14px 0 0;
+    max-width: 680px;
+    color: var(--muted);
+    font-size: 16.5px;
+    line-height: 1.6;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .desc {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 118px;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 12px;
+  }
+
+  .row.single {
+    grid-template-columns: 1fr;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 9px 11px;
+    background: white;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13);
+  }
+
+  .result {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    min-height: 92px;
+  }
+
+  .result-title {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 7px;
+  }
+
+  .big {
+    font-size: 25px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    word-break: break-word;
+  }
+
+  .small {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .formula {
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    background: var(--blue-soft);
+    color: #1e40af;
+    font-size: 13px;
+    line-height: 1.45;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .mini {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .mini strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .mini span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  footer a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 820px) {
+    .grid, .mini-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .page {
+      padding: 32px 18px 42px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+
+<body>
+<main class="page">
+  <header>
+    <a class="top-link" href="index.html">← Back to calculator catalog</a>
+    <h1>Basic Lab Conversions</h1>
+    <p class="intro">
+      Quick conversions commonly used in optics, RF electronics, and cold-atom experiments.
+      All calculations run locally in your browser.
+    </p>
+  </header>
+
+  <section class="grid">
+    <article class="card">
+      <h2>dBm ↔ power</h2>
+      <p class="desc">Convert RF or optical power between dBm, mW, and W.</p>
+
+      <div class="row">
+        <div>
+          <label for="dbmPowerInput">Input value</label>
+          <input id="dbmPowerInput" type="number" step="any" value="0" />
+        </div>
+        <div>
+          <label for="dbmPowerUnit">Unit</label>
+          <select id="dbmPowerUnit">
+            <option value="dBm">dBm</option>
+            <option value="mW">mW</option>
+            <option value="W">W</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="dbmPowerResult">—</div>
+        <div class="small" id="dbmPowerSmall">—</div>
+      </div>
+      <div class="formula">P(mW) = 10^(dBm/10)</div>
+    </article>
+
+    <article class="card">
+      <h2>dBm ↔ voltage</h2>
+      <p class="desc">Convert RF power to RMS voltage for a chosen impedance.</p>
+
+      <div class="row">
+        <div>
+          <label for="dbmVoltageInput">Power</label>
+          <input id="dbmVoltageInput" type="number" step="any" value="0" />
+        </div>
+        <div>
+          <label for="dbmVoltageUnit">Unit</label>
+          <select id="dbmVoltageUnit">
+            <option value="dBm">dBm</option>
+            <option value="mW">mW</option>
+            <option value="W">W</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="impedance">Impedance R (Ω)</label>
+          <input id="impedance" type="number" step="any" value="50" />
+        </div>
+        <div>
+          <label for="voltageMode">Display</label>
+          <select id="voltageMode">
+            <option value="rms">RMS</option>
+            <option value="peak">Peak</option>
+            <option value="pp">Peak-to-peak</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="dbmVoltageResult">—</div>
+        <div class="small" id="dbmVoltageSmall">—</div>
+      </div>
+      <div class="formula">V_rms = sqrt(P · R)</div>
+    </article>
+
+    <article class="card">
+      <h2>frequency ↔ wavelength</h2>
+      <p class="desc">Convert between optical frequency and vacuum wavelength.</p>
+
+      <div class="row">
+        <div>
+          <label for="freqWaveInput">Input value</label>
+          <input id="freqWaveInput" type="number" step="any" value="384.230" />
+        </div>
+        <div>
+          <label for="freqWaveUnit">Unit</label>
+          <select id="freqWaveUnit">
+            <option value="THz">THz</option>
+            <option value="GHz">GHz</option>
+            <option value="MHz">MHz</option>
+            <option value="nm">nm</option>
+            <option value="um">µm</option>
+            <option value="m">m</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="freqWaveResult">—</div>
+        <div class="small" id="freqWaveSmall">—</div>
+      </div>
+      <div class="formula">λ = c / f, using c = 299792458 m/s</div>
+    </article>
+
+    <article class="card">
+      <h2>energy units</h2>
+      <p class="desc">Convert frequency to photon energy and temperature equivalent.</p>
+
+      <div class="row">
+        <div>
+          <label for="energyInput">Input value</label>
+          <input id="energyInput" type="number" step="any" value="1" />
+        </div>
+        <div>
+          <label for="energyUnit">Unit</label>
+          <select id="energyUnit">
+            <option value="MHz">MHz</option>
+            <option value="GHz">GHz</option>
+            <option value="THz">THz</option>
+            <option value="cm-1">cm⁻¹</option>
+            <option value="eV">eV</option>
+            <option value="K">K</option>
+            <option value="mK">mK</option>
+            <option value="uK">µK</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="energyResult">—</div>
+        <div class="small" id="energySmall">—</div>
+      </div>
+      <div class="formula">E = h f = k_B T</div>
+    </article>
+
+    <article class="card">
+      <h2>temperature</h2>
+      <p class="desc">Convert between Celsius, Kelvin, and Fahrenheit.</p>
+
+      <div class="row">
+        <div>
+          <label for="tempInput">Input value</label>
+          <input id="tempInput" type="number" step="any" value="20" />
+        </div>
+        <div>
+          <label for="tempUnit">Unit</label>
+          <select id="tempUnit">
+            <option value="C">°C</option>
+            <option value="K">K</option>
+            <option value="F">°F</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="tempResult">—</div>
+        <div class="small" id="tempSmall">—</div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>beam area and intensity</h2>
+      <p class="desc">Estimate Gaussian peak intensity from power and 1/e² waist radius.</p>
+
+      <div class="row">
+        <div>
+          <label for="beamPower">Power</label>
+          <input id="beamPower" type="number" step="any" value="10" />
+        </div>
+        <div>
+          <label for="beamPowerUnit">Unit</label>
+          <select id="beamPowerUnit">
+            <option value="mW">mW</option>
+            <option value="W">W</option>
+            <option value="uW">µW</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="beamWaist">Waist radius w</label>
+          <input id="beamWaist" type="number" step="any" value="1" />
+        </div>
+        <div>
+          <label for="beamWaistUnit">Unit</label>
+          <select id="beamWaistUnit">
+            <option value="mm">mm</option>
+            <option value="um">µm</option>
+            <option value="m">m</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-title">Result</div>
+        <div class="big" id="beamResult">—</div>
+        <div class="small" id="beamSmall">—</div>
+      </div>
+      <div class="formula">I₀ = 2P / (πw²) for a Gaussian beam</div>
+    </article>
+
+    <article class="card wide">
+      <h2>Useful constants</h2>
+      <p class="desc">Values used in the conversions above.</p>
+      <div class="mini-grid">
+        <div class="mini">
+          <strong>Speed of light</strong>
+          <span>c = 299792458 m/s</span>
+        </div>
+        <div class="mini">
+          <strong>Planck constant</strong>
+          <span>h = 6.62607015 × 10⁻³⁴ J·s</span>
+        </div>
+        <div class="mini">
+          <strong>Boltzmann constant</strong>
+          <span>k<sub>B</sub> = 1.380649 × 10⁻²³ J/K</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <footer>
+    Intended for quick laboratory checks. Important experimental values should be verified independently.
+    <br />
+    <a href="index.html">Back to catalog</a>
+  </footer>
+</main>
+
+<script>
+const c = 299792458;
+const h = 6.62607015e-34;
+const kB = 1.380649e-23;
+const eV = 1.602176634e-19;
+
+const $ = id => document.getElementById(id);
+
+function fmt(x, sig = 6) {
+  if (!Number.isFinite(x)) return "—";
+  const ax = Math.abs(x);
+  if (ax === 0) return "0";
+  if (ax >= 1e5 || ax < 1e-3) return x.toExponential(sig - 1).replace("e", " × 10^");
+  return Number(x.toPrecision(sig)).toString();
+}
+
+function inputNumber(id) {
+  const v = parseFloat($(id).value);
+  return Number.isFinite(v) ? v : NaN;
+}
+
+function powerToW(value, unit) {
+  if (unit === "dBm") return 1e-3 * Math.pow(10, value / 10);
+  if (unit === "mW") return value * 1e-3;
+  if (unit === "uW") return value * 1e-6;
+  return value;
+}
+
+function wToDbm(w) {
+  return 10 * Math.log10(w / 1e-3);
+}
+
+function updateDbmPower() {
+  const value = inputNumber("dbmPowerInput");
+  const unit = $("dbmPowerUnit").value;
+  const w = powerToW(value, unit);
+  if (!(w > 0)) {
+    $("dbmPowerResult").textContent = "Power must be positive";
+    $("dbmPowerSmall").textContent = "";
+    return;
+  }
+  const mW = w * 1e3;
+  const dbm = wToDbm(w);
+  $("dbmPowerResult").textContent = `${fmt(dbm)} dBm`;
+  $("dbmPowerSmall").textContent = `${fmt(mW)} mW = ${fmt(w)} W`;
+}
+
+function updateDbmVoltage() {
+  const value = inputNumber("dbmVoltageInput");
+  const unit = $("dbmVoltageUnit").value;
+  const R = inputNumber("impedance");
+  const mode = $("voltageMode").value;
+  const w = powerToW(value, unit);
+  if (!(w > 0) || !(R > 0)) {
+    $("dbmVoltageResult").textContent = "Power and impedance must be positive";
+    $("dbmVoltageSmall").textContent = "";
+    return;
+  }
+  const Vrms = Math.sqrt(w * R);
+  const Vpeak = Vrms * Math.sqrt(2);
+  const Vpp = 2 * Vpeak;
+  const shown = mode === "rms" ? Vrms : mode === "peak" ? Vpeak : Vpp;
+  const unitLabel = mode === "rms" ? "V RMS" : mode === "peak" ? "V peak" : "Vpp";
+  $("dbmVoltageResult").textContent = `${fmt(shown)} ${unitLabel}`;
+  $("dbmVoltageSmall").textContent = `${fmt(Vrms)} V RMS, ${fmt(Vpeak)} V peak, ${fmt(Vpp)} Vpp`;
+}
+
+function updateFreqWave() {
+  const value = inputNumber("freqWaveInput");
+  const unit = $("freqWaveUnit").value;
+  if (!(value > 0)) {
+    $("freqWaveResult").textContent = "Input must be positive";
+    $("freqWaveSmall").textContent = "";
+    return;
+  }
+
+  let f, lambda;
+  if (unit === "THz") f = value * 1e12;
+  else if (unit === "GHz") f = value * 1e9;
+  else if (unit === "MHz") f = value * 1e6;
+  else {
+    if (unit === "nm") lambda = value * 1e-9;
+    else if (unit === "um") lambda = value * 1e-6;
+    else lambda = value;
+    f = c / lambda;
+  }
+
+  lambda = c / f;
+  $("freqWaveResult").textContent = `${fmt(lambda * 1e9)} nm`;
+  $("freqWaveSmall").textContent = `${fmt(f / 1e12)} THz = ${fmt(f / 1e9)} GHz`;
+}
+
+function energyToJ(value, unit) {
+  if (unit === "MHz") return h * value * 1e6;
+  if (unit === "GHz") return h * value * 1e9;
+  if (unit === "THz") return h * value * 1e12;
+  if (unit === "cm-1") return h * c * value * 100;
+  if (unit === "eV") return value * eV;
+  if (unit === "K") return kB * value;
+  if (unit === "mK") return kB * value * 1e-3;
+  if (unit === "uK") return kB * value * 1e-6;
+  return NaN;
+}
+
+function updateEnergy() {
+  const value = inputNumber("energyInput");
+  const unit = $("energyUnit").value;
+  const E = energyToJ(value, unit);
+  if (!(E > 0)) {
+    $("energyResult").textContent = "Input must be positive";
+    $("energySmall").textContent = "";
+    return;
+  }
+  const f = E / h;
+  const T = E / kB;
+  const ev = E / eV;
+  const wavenumber = f / (c * 100);
+  $("energyResult").textContent = `${fmt(f / 1e6)} MHz`;
+  $("energySmall").textContent = `${fmt(f / 1e9)} GHz, ${fmt(wavenumber)} cm⁻¹, ${fmt(ev)} eV, ${fmt(T)} K`;
+}
+
+function updateTemp() {
+  const value = inputNumber("tempInput");
+  const unit = $("tempUnit").value;
+  let K;
+  if (unit === "C") K = value + 273.15;
+  else if (unit === "F") K = (value - 32) * 5 / 9 + 273.15;
+  else K = value;
+
+  const C = K - 273.15;
+  const F = C * 9 / 5 + 32;
+  if (K < 0) {
+    $("tempResult").textContent = "Below absolute zero";
+    $("tempSmall").textContent = "";
+    return;
+  }
+  $("tempResult").textContent = `${fmt(K)} K`;
+  $("tempSmall").textContent = `${fmt(C)} °C = ${fmt(F)} °F`;
+}
+
+function updateBeam() {
+  const power = inputNumber("beamPower");
+  const powerUnit = $("beamPowerUnit").value;
+  const waist = inputNumber("beamWaist");
+  const waistUnit = $("beamWaistUnit").value;
+
+  const P = powerToW(power, powerUnit);
+  const w = waistUnit === "mm" ? waist * 1e-3 : waistUnit === "um" ? waist * 1e-6 : waist;
+
+  if (!(P > 0) || !(w > 0)) {
+    $("beamResult").textContent = "Power and waist must be positive";
+    $("beamSmall").textContent = "";
+    return;
+  }
+
+  const area = Math.PI * w * w;
+  const I0 = 2 * P / area;
+  const Iavg = P / area;
+
+  $("beamResult").textContent = `${fmt(I0 / 1e4)} W/cm²`;
+  $("beamSmall").textContent = `Peak intensity I₀ = ${fmt(I0)} W/m²; P/(πw²) = ${fmt(Iavg / 1e4)} W/cm²`;
+}
+
+function updateAll() {
+  updateDbmPower();
+  updateDbmVoltage();
+  updateFreqWave();
+  updateEnergy();
+  updateTemp();
+  updateBeam();
+}
+
+document.querySelectorAll("input, select").forEach(el => {
+  el.addEventListener("input", updateAll);
+  el.addEventListener("change", updateAll);
+});
+
+updateAll();
+</script>
+</body>
+</html>
