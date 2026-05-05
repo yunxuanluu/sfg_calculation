@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gaussian Beam Propagator</title>
+<style>
+  :root{
+    --page:#f6f8fc; --panel:#ffffff; --ink:#182033; --muted:#667085; --soft:#f8fafc;
+    --line:#d7deea; --line2:#e8edf5; --accent:#4f46e5; --accent2:#2563eb;
+    --danger:#dc2626; --good:#059669; --warn:#d97706; --shadow:0 16px 40px rgba(15,23,42,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{font-size:16px}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    background:radial-gradient(circle at top left,#edf4ff 0,#f7f9fc 36%,#fbfbfd 100%);
+    color:var(--ink);
+  }
+  header{padding:24px 28px 8px;max-width:1540px;margin:0 auto}
+  h1{margin:0;font-size:clamp(28px,3vw,40px);letter-spacing:-.035em;line-height:1.05}
+  .subtitle{margin:8px 0 0;color:var(--muted);line-height:1.45;max-width:920px;font-size:15px}
+  .app{max-width:1540px;margin:0 auto;padding:16px 28px 28px;display:grid;grid-template-columns:minmax(360px,400px) minmax(0,1fr);gap:20px;align-items:start}
+  .card{background:rgba(255,255,255,.94);border:1px solid rgba(148,163,184,.28);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .controls{padding:18px;position:sticky;top:14px;max-height:calc(100vh - 28px);overflow:auto}
+  .main{display:grid;grid-template-rows:auto auto;gap:20px;min-width:0}
+  fieldset{border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;margin:0 0 14px;background:linear-gradient(180deg,#fff,#fbfdff)}
+  legend{font-weight:800;color:#202b43;padding:0 8px;font-size:16px}
+  label{display:flex;align-items:flex-end;min-height:34px;font-size:13px;font-weight:700;margin:0 0 7px;color:#344054;line-height:1.25}
+  input[type="number"], input[type="text"]{
+    width:100%;height:42px;border:1px solid #cbd5e1;border-radius:12px;padding:9px 11px;font-size:14px;background:#fff;color:var(--ink);outline:none;
+    font-family:inherit;
+  }
+  input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(37,99,235,.13)}
+  .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+  .row>div{min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  button,.file-label{
+    border:0;border-radius:12px;padding:10px 14px;height:42px;line-height:1;font-weight:800;cursor:pointer;background:#e8eef7;color:#162033;
+    transition:.16s transform,.16s box-shadow,.16s background;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-family:inherit;
+    vertical-align:middle;appearance:none;-webkit-appearance:none;margin:0;
+  }
+  .config-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .config-actions button,.config-actions .file-label{width:100%;height:52px}
+  button:hover,.file-label:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.10)}
+  .primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff}
+  .danger{background:#fee2e2;color:#991b1b}.ghost{background:#f8fafc;color:#334155;border:1px solid #dfe7f2}.good{background:#dcfce7;color:#166534}
+  input[type="file"]{display:none}
+  .lens-list{display:grid;gap:9px;margin-top:10px}
+  .lens-item{border:1px solid #e2e8f0;border-radius:14px;padding:11px;background:#f8fafc;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+  .lens-item.active{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(37,99,235,.11);background:#eef6ff}
+  .lens-title{font-weight:850}.lens-meta{font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis}.badge{font-size:12px;border-radius:999px;padding:4px 9px;background:#e0e7ff;color:#3730a3;font-weight:850}.badge.div{background:#ffedd5;color:#9a3412}
+  .plot-card{padding:20px;min-height:520px}.plot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.plot-title{font-size:20px;font-weight:900;letter-spacing:-.02em}.readout{min-width:220px;background:#0f172a;color:#e2e8f0;border-radius:15px;padding:12px 14px;font-variant-numeric:tabular-nums;font-size:13px;line-height:1.55;box-shadow:0 8px 22px rgba(15,23,42,.12)}
+  canvas{width:100%;height:430px;border-radius:16px;background:#fff;border:1px solid #e5eaf3;display:block}
+  .table-card{padding:20px;overflow:auto}.table-title{font-size:20px;font-weight:900;margin-bottom:12px;letter-spacing:-.02em}table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;font-variant-numeric:tabular-nums}th,td{padding:11px 10px;border-bottom:1px solid #e5eaf3;text-align:right;white-space:nowrap}th{background:#f3f6fb;color:#334155;font-size:12px;text-transform:uppercase;letter-spacing:.04em}td:first-child,th:first-child{text-align:left}tr:hover td{background:#f8fafc}.status{margin:12px 2px 0;color:#475569;font-size:13px;line-height:1.45}.hint{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.45}.small{font-size:12px;color:var(--muted)}
+  @media(max-width:1050px){.app{grid-template-columns:1fr}.controls{position:static;max-height:none}canvas{height:360px}}
+  @media(max-width:560px){header,.app{padding-left:14px;padding-right:14px}.row{grid-template-columns:1fr}.readout{min-width:160px}.plot-head{flex-direction:column}canvas{height:320px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gaussian Beam Propagator</h1>
+  <p class="subtitle">Browser-based ABCD-matrix Gaussian beam calculator. Distances, focal lengths, beam radii, Rayleigh ranges, and waist positions are in mm unless stated otherwise.</p>
+</header>
+<div class="app">
+  <aside class="card controls">
+    <fieldset>
+      <legend>Configuration</legend>
+      <div class="config-actions">
+        <button class="primary" id="saveBtn" type="button">Save CSV</button>
+        <label class="file-label" for="loadFile">Load CSV</label><input id="loadFile" type="file" accept=".csv,text/csv" />
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Initial beam</legend>
+      <div class="row">
+        <div><label>Wavelength λ (nm)</label><input id="wavelength" type="number" step="any" value="632.8"></div>
+        <div><label>Initial waist radius w₀ (mm)</label><input id="waist" type="number" step="any" value="1.0"></div>
+      </div>
+      <div class="btnrow"><button class="primary" id="initBtn">Initialize / update beam</button></div>
+      <div class="hint">The input follows your Python script: the initial beam is treated as a waist at z = 0.</div>
+    </fieldset>
+    <fieldset>
+      <legend>Add lens</legend>
+      <div class="row">
+        <div><label>Focal length f (mm)</label><input id="focal" type="number" step="any" value="100"></div>
+        <div><label>Distance from previous element (mm)</label><input id="distance" type="number" step="any" value="0"></div>
+      </div>
+      <div class="btnrow"><button class="good" id="addBtn">Add lens</button><button class="ghost" id="clearBtn">Clear all</button></div>
+      <div class="hint">Positive f: converging lens. Negative f: diverging lens.</div>
+    </fieldset>
+    <fieldset>
+      <legend>Optical elements</legend>
+      <div id="lensList" class="lens-list"></div>
+      <div id="emptyLens" class="small">No lenses added.</div>
+      <div class="row" style="margin-top:12px">
+        <div><label>Edit f (mm)</label><input id="editFocal" type="number" step="any"></div>
+        <div><label>Edit absolute z (mm)</label><input id="editPos" type="number" step="any"></div>
+      </div>
+      <div class="btnrow"><button id="updateBtn">Update selected</button><button class="danger" id="deleteBtn">Delete selected</button></div>
+      <div class="hint">Click a lens to edit it. Double-click a table row to delete the corresponding lens.</div>
+    </fieldset>
+    <fieldset>
+      <legend>Plot range</legend>
+      <div class="row">
+        <div><label>Z start (mm)</label><input id="zStart" type="number" step="any" value="-200"></div>
+        <div><label>Z end (mm)</label><input id="zEnd" type="number" step="any" value="200"></div>
+      </div>
+      <div class="btnrow"><button class="primary" id="plotBtn">Update plot</button></div>
+    </fieldset>
+    <div class="status" id="status">Ready. Beam initialized with default parameters.</div>
+  </aside>
+  <main class="main">
+    <section class="card plot-card">
+      <div class="plot-head">
+        <div><div class="plot-title">Beam propagation visualization</div><div class="small">Hover over the plot to read local beam parameters.</div></div>
+        <div class="readout" id="readout">z: —<br>w: —<br>Ø: —<br>R: —</div>
+      </div>
+      <canvas id="plot" width="1200" height="470"></canvas>
+    </section>
+    <section class="card table-card">
+      <div class="table-title">Beam parameters at optical elements</div>
+      <table id="paramTable">
+        <thead><tr><th>Element</th><th>Element pos. (mm)</th><th>Waist radius (mm)</th><th>zR (mm)</th><th>Waist pos. abs. (mm)</th><th>Waist pos. rel. (mm)</th><th>R (mm)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+<script>
+class Complex{constructor(re,im){this.re=re;this.im=im}add(o){return new Complex(this.re+o.re,this.im+o.im)}mul(o){return new Complex(this.re*o.re-this.im*o.im,this.re*o.im+this.im*o.re)}div(o){const d=o.re*o.re+o.im*o.im;return new Complex((this.re*o.re+this.im*o.im)/d,(this.im*o.re-this.re*o.im)/d)}inv(){const d=this.re*this.re+this.im*this.im;return new Complex(this.re/d,-this.im/d)}}
+class OpticalElement{constructor(name,focalLength,position){this.name=name;this.focalLength=focalLength;this.position=position}}
+class GaussianBeamPropagator{
+  constructor(wavelengthNm, initialWaistMm){this.wavelength=wavelengthNm*1e-6;this.wavelengthNm=wavelengthNm;this.initialWaist=initialWaistMm;this.elements=[]}
+  addElement(focalLength,distance){const position=this.elements.length?this.elements[this.elements.length-1].position+distance:distance;this.elements.push(new OpticalElement(`Lens ${this.elements.length+1}`,focalLength,position))}
+  removeElement(index){if(index>=0&&index<this.elements.length){this.elements.splice(index,1);this.elements.forEach((e,i)=>e.name=`Lens ${i+1}`)}}
+  clearElements(){this.elements=[]}
+  complexBeamParameter(z,w0,z0){const zR=Math.PI*w0*w0/this.wavelength;return new Complex(z-z0,zR)}
+  transformQ(q,M){const A=M[0][0],B=M[0][1],C=M[1][0],D=M[1][1];return (new Complex(A,0).mul(q).add(new Complex(B,0))).div(new Complex(C,0).mul(q).add(new Complex(D,0)))}
+  propagationMatrix(d){return [[1,d],[0,1]]}
+  thinLensMatrix(f){return [[1,0],[-1/f,1]]}
+  extractBeamParams(q,position){const qi=q.inv();const w=Math.sqrt(-this.wavelength/(Math.PI*qi.im));const R=Math.abs(qi.re)<1e-10?Infinity:1/qi.re;const zR=q.im;const waistPosition=position-q.re;return {position,waist:w,waistDiameter:2*w,rayleighRange:zR,waistPosition,distanceToWaist:q.re,radiusOfCurvature:R}}
+  qAt(z){let q=this.complexBeamParameter(0,this.initialWaist,0);let currentZ=0;const sorted=[...this.elements].sort((a,b)=>a.position-b.position);for(const elem of sorted){if(elem.position<=z){q=this.transformQ(q,this.propagationMatrix(elem.position-currentZ));currentZ=elem.position;q=this.transformQ(q,this.thinLensMatrix(elem.focalLength))}else break}q=this.transformQ(q,this.propagationMatrix(z-currentZ));return q}
+  paramsAt(z){return this.extractBeamParams(this.qAt(z),z)}
+  propagate(zStart,zEnd,numPoints=1000){const positions=[],diameters=[];for(let i=0;i<numPoints;i++){const z=zStart+(zEnd-zStart)*i/(numPoints-1);const p=this.paramsAt(z);positions.push(z);diameters.push(p.waistDiameter)}return {positions,diameters}}
+  getElementParameters(){const list=[];const zR0=Math.PI*this.initialWaist*this.initialWaist/this.wavelength;list.push({position:0,waist:this.initialWaist,waistDiameter:2*this.initialWaist,rayleighRange:zR0,waistPosition:0,distanceToWaist:0,radiusOfCurvature:Infinity});let q=this.complexBeamParameter(0,this.initialWaist,0);let currentZ=0;const sorted=[...this.elements].sort((a,b)=>a.position-b.position);for(const elem of sorted){q=this.transformQ(q,this.propagationMatrix(elem.position-currentZ));currentZ=elem.position;q=this.transformQ(q,this.thinLensMatrix(elem.focalLength));const atElem=this.extractBeamParams(q,elem.position);const zWaist=atElem.waistPosition;const qAtWaist=Math.abs(zWaist-elem.position)>1e-10?this.transformQ(q,this.propagationMatrix(zWaist-elem.position)):q;list.push(this.extractBeamParams(qAtWaist,zWaist))}return list}
+}
+const $=id=>document.getElementById(id);let propagator=new GaussianBeamPropagator(632.8,1.0);let selectedIndex=null;let currentData=null;const canvas=$('plot'),ctx=canvas.getContext('2d');
+function num(id){const v=parseFloat($(id).value);if(!Number.isFinite(v))throw new Error(`Invalid value in ${id}`);return v}
+function setStatus(s){$('status').textContent=s}
+function format(x,d=4){return Number.isFinite(x)?x.toFixed(d):'∞'}
+function initBeam(){const wl=num('wavelength'),w=num('waist');if(wl<=0||w<=0)throw new Error('Wavelength and waist must be positive.');const old=propagator?propagator.elements:[];propagator=new GaussianBeamPropagator(wl,w);propagator.elements=old.map((e,i)=>new OpticalElement(`Lens ${i+1}`,e.focalLength,e.position));setStatus(`Beam initialized: λ=${wl} nm, w₀=${w} mm.`);renderAll()}
+function addLens(){if(!propagator)initBeam();const f=num('focal'),d=num('distance');if(f===0)throw new Error('Focal length cannot be zero.');propagator.addElement(f,d);selectedIndex=propagator.elements.length-1;setStatus(`Added Lens ${selectedIndex+1}: f=${f} mm.`);renderAll()}
+function renderLensList(){const box=$('lensList');box.innerHTML='';$('emptyLens').style.display=propagator.elements.length?'none':'block';propagator.elements.forEach((e,i)=>{const item=document.createElement('div');item.className='lens-item'+(i===selectedIndex?' active':'');item.innerHTML=`<div><div class="lens-title">${e.name}</div><div class="lens-meta">f = ${e.focalLength.toFixed(3)} mm · z = ${e.position.toFixed(3)} mm</div></div><span class="badge ${e.focalLength<0?'div':''}">${e.focalLength>0?'Conv':'Div'}</span>`;item.onclick=()=>selectLens(i);box.appendChild(item)})}
+function selectLens(i){selectedIndex=i;const e=propagator.elements[i];$('editFocal').value=e.focalLength;$('editPos').value=e.position;renderLensList()}
+function updateSelected(){if(selectedIndex===null)throw new Error('Please select a lens first.');const f=num('editFocal'),z=num('editPos');if(f===0)throw new Error('Focal length cannot be zero.');propagator.elements[selectedIndex].focalLength=f;propagator.elements[selectedIndex].position=z;setStatus(`Updated Lens ${selectedIndex+1}.`);renderAll()}
+function deleteSelected(){if(selectedIndex===null)throw new Error('Please select a lens first.');propagator.removeElement(selectedIndex);selectedIndex=null;$('editFocal').value='';$('editPos').value='';setStatus('Selected lens deleted.');renderAll()}
+function clearAll(){propagator.clearElements();selectedIndex=null;$('editFocal').value='';$('editPos').value='';setStatus('All lenses cleared.');renderAll()}
+function plot(){const zStart=num('zStart'),zEnd=num('zEnd');if(zStart>=zEnd)throw new Error('Z start must be less than Z end.');currentData=propagator.propagate(zStart,zEnd,1200);drawPlot();renderTable()}
+
+function wavelengthToBeamColor(wavelengthNm){
+  // Approximate perceived laser color from wavelength.
+  // IR is shown as red, as requested. UV is shown as violet.
+  let wl = Number(wavelengthNm);
+  if(!Number.isFinite(wl)) wl = 632.8;
+  if(wl >= 750) return {r:185,g:28,b:28,stroke:'rgb(185,28,28)',fill:'rgba(185,28,28,0.15)'};
+  if(wl < 380) return {r:139,g:92,b:246,stroke:'rgb(139,92,246)',fill:'rgba(139,92,246,0.15)'};
+  let r=0,g=0,b=0;
+  if(wl < 440){r=-(wl-440)/(440-380); g=0; b=1;}
+  else if(wl < 490){r=0; g=(wl-440)/(490-440); b=1;}
+  else if(wl < 510){r=0; g=1; b=-(wl-510)/(510-490);}
+  else if(wl < 580){r=(wl-510)/(580-510); g=1; b=0;}
+  else if(wl < 645){r=1; g=-(wl-645)/(645-580); b=0;}
+  else {r=1; g=0; b=0;}
+  let factor=1;
+  if(wl < 420) factor=0.35+0.65*(wl-380)/(420-380);
+  else if(wl > 700) factor=0.35+0.65*(750-wl)/(750-700);
+  const gamma=0.8;
+  const to255 = c => Math.round(255*Math.pow(Math.max(0,c*factor),gamma));
+  let R=to255(r), G=to255(g), B=to255(b);
+  // Softly boost very dark edge wavelengths so the beam remains visible and pleasant.
+  R=Math.max(R, wl>620 ? 210 : 0);
+  B=Math.max(B, wl<430 ? 190 : 0);
+  return {r:R,g:G,b:B,stroke:`rgb(${R},${G},${B})`,fill:`rgba(${R},${G},${B},0.16)`};
+}
+
+function drawPlot(mouseX=null){const W=canvas.width,H=canvas.height,pad={l:96,r:26,t:28,b:62};ctx.clearRect(0,0,W,H);const {positions,diameters}=currentData;const zMin=positions[0],zMax=positions[positions.length-1];let yMax=Math.max(...diameters.map(d=>d/2),1e-9)*1.35;for(const e of propagator.elements){if(e.position>=zMin&&e.position<=zMax)yMax*=1.02}const xPix=z=>pad.l+(z-zMin)/(zMax-zMin)*(W-pad.l-pad.r);const yPix=y=>pad.t+(yMax-y)/(2*yMax)*(H-pad.t-pad.b);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1;ctx.font='13px system-ui';ctx.fillStyle='#64748b';
+  ctx.textAlign='center';
+  for(let i=0;i<=8;i++){const z=zMin+(zMax-zMin)*i/8;const x=xPix(z);ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();ctx.fillText(z.toFixed(0),x,H-28)}
+  ctx.textAlign='right';
+  for(let i=-4;i<=4;i++){const y=yMax*i/4;const yp=yPix(y);ctx.beginPath();ctx.moveTo(pad.l,yp);ctx.lineTo(W-pad.r,yp);ctx.stroke();if(i!==0)ctx.fillText(y.toFixed(2),pad.l-16,yp+4)}
+  ctx.textAlign='left';
+  ctx.strokeStyle='#94a3b8';ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(pad.l,yPix(0));ctx.lineTo(W-pad.r,yPix(0));ctx.stroke();ctx.setLineDash([]);
+  const top=[],bot=[];positions.forEach((z,i)=>{top.push([xPix(z),yPix(diameters[i]/2)]);bot.push([xPix(z),yPix(-diameters[i]/2)])});ctx.beginPath();top.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));bot.reverse().forEach(([x,y])=>ctx.lineTo(x,y));ctx.closePath();const beamColor=wavelengthToBeamColor(propagator.wavelengthNm);ctx.fillStyle=beamColor.fill;ctx.fill();ctx.strokeStyle=beamColor.stroke;ctx.lineWidth=2.3;ctx.shadowColor=beamColor.fill;ctx.shadowBlur=4;[top,bot.reverse()].forEach(arr=>{ctx.beginPath();arr.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()});ctx.shadowBlur=0;
+  propagator.elements.forEach((e,i)=>{if(e.position<zMin||e.position>zMax)return;const x=xPix(e.position);ctx.strokeStyle=e.focalLength>0?'#dc2626':'#d97706';ctx.lineWidth=3;ctx.setLineDash(e.focalLength>0?[]:[8,5]);ctx.beginPath();ctx.moveTo(x,yPix(-yMax*.88));ctx.lineTo(x,yPix(yMax*.88));ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=ctx.strokeStyle;ctx.font='12px system-ui';ctx.textAlign='center';ctx.fillText(e.name,x,yPix(-yMax*.98));ctx.textAlign='left'});
+  ctx.strokeStyle='#111827';ctx.lineWidth=1.3;ctx.strokeRect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);ctx.fillStyle='#334155';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText('Position z (mm)',W/2,H-12);ctx.save();ctx.translate(28,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('Beam radius w (mm)',0,0);ctx.restore();ctx.textAlign='left';
+  if(mouseX!==null){const z=zMin+(mouseX-pad.l)/(W-pad.l-pad.r)*(zMax-zMin);if(z>=zMin&&z<=zMax){const p=propagator.paramsAt(z);const x=xPix(z),y=yPix(p.waist);ctx.strokeStyle='#ef4444';ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,H-pad.b);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();$('readout').innerHTML=`z: ${z.toFixed(2)} mm<br>w: ${p.waist.toFixed(5)} mm<br>Ø: ${p.waistDiameter.toFixed(5)} mm<br>R: ${Number.isFinite(p.radiusOfCurvature)?p.radiusOfCurvature.toFixed(2)+' mm':'∞'}`}}
+}
+function renderTable(){const tbody=$('paramTable').querySelector('tbody');tbody.innerHTML='';const params=propagator.getElementParameters();const sorted=[...propagator.elements].sort((a,b)=>a.position-b.position);params.forEach((p,i)=>{const tr=document.createElement('tr');let label='Initial Beam',elemPos='0.00',rel=0;if(i>0){const e=sorted[i-1];label=e.name;elemPos=e.position.toFixed(2);rel=p.waistPosition-e.position;tr.dataset.lensIndex=propagator.elements.indexOf(e)}tr.innerHTML=`<td>${label}</td><td>${elemPos}</td><td>${format(p.waist,4)}</td><td>${format(p.rayleighRange,2)}</td><td>${format(p.waistPosition,2)}</td><td>${format(rel,2)}</td><td>${format(p.radiusOfCurvature,2)}</td>`;if(i>0){tr.ondblclick=()=>{selectedIndex=parseInt(tr.dataset.lensIndex);deleteSelected()}}tbody.appendChild(tr)})}
+function renderAll(){renderLensList();plot()}
+function saveCSV(){let rows=[['# Gaussian Beam Propagator Configuration'],['# Beam Parameters'],['Wavelength_nm',propagator.wavelengthNm],['Initial_Waist_mm',propagator.initialWaist],[''],['# Optical Elements'],['Element_Name','Focal_Length_mm','Position_mm']];propagator.elements.forEach(e=>rows.push([e.name,e.focalLength,e.position]));const csv=rows.map(r=>r.join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='gaussian_beam_config.csv';a.click();URL.revokeObjectURL(url);setStatus('Configuration saved as CSV.')}
+function loadCSV(text){const rows=text.split(/\r?\n/).map(line=>line.split(',').map(s=>s.trim()));let wl=null,w0=null,elements=[],reading=false;for(const r of rows){if(!r[0]||r[0].startsWith('#'))continue;if(r[0]==='Wavelength_nm')wl=parseFloat(r[1]);else if(r[0]==='Initial_Waist_mm')w0=parseFloat(r[1]);else if(r[0]==='Element_Name'){reading=true;continue}else if(reading&&r.length>=3){elements.push(new OpticalElement(r[0],parseFloat(r[1]),parseFloat(r[2])))}}if(!Number.isFinite(wl)||!Number.isFinite(w0))throw new Error('Invalid CSV: missing beam parameters.');propagator=new GaussianBeamPropagator(wl,w0);propagator.elements=elements.map((e,i)=>new OpticalElement(`Lens ${i+1}`,e.focalLength,e.position));$('wavelength').value=wl;$('waist').value=w0;selectedIndex=null;setStatus(`Loaded CSV: λ=${wl} nm, w₀=${w0} mm, ${elements.length} elements.`);renderAll()}
+function guard(fn){return (...args)=>{try{fn(...args)}catch(e){setStatus('Error: '+e.message);alert(e.message)}}}
+$('initBtn').onclick=guard(initBeam);$('addBtn').onclick=guard(addLens);$('plotBtn').onclick=guard(plot);$('clearBtn').onclick=guard(clearAll);$('updateBtn').onclick=guard(updateSelected);$('deleteBtn').onclick=guard(deleteSelected);$('saveBtn').onclick=guard(saveCSV);$('loadFile').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>guard(loadCSV)(reader.result);reader.readAsText(file)};
+canvas.addEventListener('mousemove',e=>{if(!currentData)return;const rect=canvas.getBoundingClientRect();drawPlot((e.clientX-rect.left)*canvas.width/rect.width)});canvas.addEventListener('mouseleave',()=>{if(currentData){$('readout').innerHTML='z: —<br>w: —<br>Ø: —<br>R: —';drawPlot()}});
+renderAll();
+</script>
+</body>
+</html>
