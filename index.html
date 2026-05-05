@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab Calculators</title>
+<meta name="description" content="Simple browser-based calculators for optics and cold-molecule experiments." />
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --blue: #2563eb;
+    --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 24px;
+  }
+
+  header {
+    margin-bottom: 36px;
+  }
+
+  .name {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  .intro {
+    margin: 16px 0 0;
+    max-width: 620px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    display: block;
+    padding: 26px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: #bfdbfe;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.11);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: baseline;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 23px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .tag {
+    flex: 0 0 auto;
+    color: var(--blue);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .card p {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 15.5px;
+    line-height: 1.55;
+  }
+
+  .links {
+    margin-top: 28px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .links a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.92em;
+  }
+
+  @media (min-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .page {
+      padding: 36px 18px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    .card-top {
+      display: block;
+    }
+
+    .tag {
+      display: block;
+      margin-top: 8px;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <div class="name">Yunxuan Lu</div>
+      <h1>Lab Calculators</h1>
+      <p class="intro">
+        A small collection of browser-based calculators for optics and cold-molecule experiments.
+        These tools run locally in the browser and do not need installation.
+      </p>
+    </header>
+
+    <section class="grid" aria-label="Calculator catalog">
+      <a class="card" href="sfg_calculator.html">
+        <div class="card-top">
+          <h2>LiRb STIRAP SFG Calculator</h2>
+          <span class="tag">Open →</span>
+        </div>
+        <p>
+          Wavelength and frequency conversion for the LiRb STIRAP SFG laser system.
+        </p>
+      </a>
+
+      <a class="card" href="gaussian_beam.html">
+        <div class="card-top">
+          <h2>Gaussian Beam Propagator</h2>
+          <span class="tag">Open →</span>
+        </div>
+        <p>
+          ABCD-matrix Gaussian beam propagation with lenses, plots, and CSV save/load.
+        </p>
+      </a>
+    </section>
+
+    <div class="links">
+      <a href="README.md">README</a>
+      <a href="LICENSE">MIT License</a>
+      <a href="https://github.com/yunxuanluu" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+
+    <footer>
+      This page is intended as a simple catalog. Keep this file as <code>index.html</code>,
+      and place each calculator as a separate HTML page in the same repository.
+    </footer>
+  </main>
+</body>
+</html>
